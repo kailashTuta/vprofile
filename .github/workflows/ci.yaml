@@ -31,8 +31,12 @@ jobs:
         runs-on: ubuntu-latest
         needs: [build]
         steps:
-          - name: Build project
-            run: mvn --batch-mode package -DskipTests
+          - uses: actions/download-artifact@v8
+            with:
+              name: packaged-artifact
+
+          - name: Display structure of downloaded files
+            run: ls -R
 
           - name: Run Dependency-Check Action
             uses: dependency-check/Dependency-Check_Action@main
