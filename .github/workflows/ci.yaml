@@ -25,5 +25,5 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                 name: packaged-artifact
-                path: target/*.jar 
+                path: target/vprofile-v2.war
               
