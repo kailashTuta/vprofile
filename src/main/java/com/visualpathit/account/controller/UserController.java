@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 /**{@author waheedk}*/
 @Controller
 public class UserController {
@@ -57,7 +58,9 @@ public class UserController {
     }
     /** {@inheritDoc} */
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public final String login(final Model model, final String error, final String logout) {
+    public final String login(final Model model,
+                              @RequestParam(value = "error", required = false) final String error,
+                              @RequestParam(value = "logout", required = false) final String logout) {
         System.out.println("Model data"+model.toString());
     	if (error != null){
             model.addAttribute("error", "Your username and password is invalid.");

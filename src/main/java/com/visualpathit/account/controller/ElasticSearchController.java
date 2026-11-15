@@ -70,7 +70,7 @@ public class ElasticSearchController {
     }
 
     @RequestMapping(value="/rest/users/view/{id}", method=RequestMethod.GET)
-    public String  view(@PathVariable final String id,final Model model) {
+    public String  view(@PathVariable("id") final String id,final Model model) {
         GetResponse getResponse = ElasticsearchUtil.trannsportClient().prepareGet("users", "user", id).get();
         System.out.println(getResponse.getSource());
         
@@ -92,7 +92,7 @@ public class ElasticSearchController {
     }*/
 
     @RequestMapping(value="/rest/users/update/{id}", method=RequestMethod.GET)
-    public String update(@PathVariable final String id,final Model model) throws IOException {
+    public String update(@PathVariable("id") final String id,final Model model) throws IOException {
 
         UpdateRequest updateRequest = new UpdateRequest();
         updateRequest.index("employee")
@@ -113,7 +113,7 @@ public class ElasticSearchController {
         return "elasticeSearchRes";
     }
     @RequestMapping(value="/rest/users/delete/{id}", method=RequestMethod.GET)
-    public String delete(@PathVariable final String id,final Model model) {
+    public String delete(@PathVariable("id") final String id,final Model model) {
 
         DeleteResponse deleteResponse =ElasticsearchUtil.trannsportClient().prepareDelete("employee", "id", id).get();
         System.out.println(deleteResponse.getResult().toString());
