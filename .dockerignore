@@ -1,0 +1,18 @@
+# Build artifacts and version-control metadata
+target/
+.git/
+.github/
+
+# IDE and local environment files
+.idea/
+.vscode/
+*.iml
+.env
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# OS metadata
+.DS_Store
+Thumbs.db

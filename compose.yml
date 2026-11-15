@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  database:
+    build:
+      context: ./Docker-db
+    container_name: devopsdb
+    image: kailashtuta/devops-vprofile-db:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: devopspassword
+      MYSQL_DATABASE: accounts
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  application:
+    build:
+      context: .
+      dockerfile: Docker-app/Dockerfile
+    container_name: appcontainer
+    image: kailashtuta/devops-vprofile-app:latest
+    depends_on:
+      - database
+    ports:
+      - "1234:8080"
+    environment:
+      JDBC_URL: jdbc:mysql://database:3306/accounts?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+      JDBC_USERNAME: root
+      JDBC_PASSWORD: devopspassword
+
+volumes:
+  db_data:

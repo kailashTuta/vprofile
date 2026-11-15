@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  database:
+    image: kailashtuta/devops-vprofile-db:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: devopspassword
+      MYSQL_DATABASE: accounts
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    deploy:
+      replicas: 1
+
+  application:
+    image: kailashtuta/devops-vprofile-app:latest
+    depends_on:
+      - database
+    environment:
+      JDBC_URL: jdbc:mysql://database:3306/accounts?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+      JDBC_USERNAME: root
+      JDBC_PASSWORD: devopspassword
+    ports:
+      - "1234:8080"
+    deploy:
+      replicas: 2
+
+volumes:
+  db_data:
