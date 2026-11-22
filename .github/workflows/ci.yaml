@@ -64,7 +64,7 @@ jobs:
       strategy:
         fail-fast: false
         matrix:
-          folders: [docker-app, docker-db]
+          folders: [Docker-app, Docker-db]
       steps:
         - name: checkout code
           uses: actions/checkout@v7
