@@ -27,7 +27,7 @@ jobs:
                 name: packaged-artifact
                 path: target/vprofile-v2.war
 
-    Dependency-check:
+    dependency-check:
         runs-on: ubuntu-latest
         needs: [build]
         steps:
@@ -59,7 +59,8 @@ jobs:
               retention-days: 7
     
     docker-scan:
-      runs-on: ubunut-latest
+      runs-on: ubutu-latest
+      needs: [dependency-check]
       strategy:
         fail-fast: false
         matrix:
