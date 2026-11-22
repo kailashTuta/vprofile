@@ -1,6 +1,6 @@
 package com.visualpathit.account.modelTest;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -46,11 +46,11 @@ public class UserTest {
 
     @Test
     public void testUserDetailsHappyFlow() throws Exception {
-    	Assert.assertEquals(EXPECTED_ID, user.getId());
-        Assert.assertEquals(EXPECTED_USERNAME, user.getUsername());
-        Assert.assertEquals(EXPECTED_PASSWD, user.getPassword());
-        Assert.assertEquals(EXPECTED_USEREMAIL, user.getUserEmail());
-        Assert.assertEquals(EXPECTED_SIZE,user.getRoles().size());
+    	assertEquals(EXPECTED_ID, user.getId());
+        assertEquals(EXPECTED_USERNAME, user.getUsername());
+        assertEquals(EXPECTED_PASSWD, user.getPassword());
+        assertEquals(EXPECTED_USEREMAIL, user.getUserEmail());
+        assertEquals(EXPECTED_SIZE, user.getRoles().size());
 
     }
 }
