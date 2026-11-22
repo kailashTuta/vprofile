@@ -1,60 +1,53 @@
 package com.visualpathit.account.utils;
 
-import java.net.InetSocketAddress;
+import java.io.IOException;
 
 import jakarta.annotation.PreDestroy;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.json.jackson.JacksonJsonpMapper;
+import co.elastic.clients.transport.rest_client.RestClientTransport;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.visualpathit.account.beans.Components;
+
 @Service
 public class ElasticsearchUtil {
 	
 	private static Components object;
-	private static volatile TransportClient transportClient;
+	private static volatile ElasticsearchClient elasticsearchClient;
+	private static RestClient restClient;
 
     @Autowired
-    public void setComponents(Components object){
+    public void setComponents(Components object) {
     	ElasticsearchUtil.object = object;    	
     	
     }
-    @SuppressWarnings("resource")
-    public static TransportClient trannsportClient() {
-    	if (transportClient == null) {
-    		synchronized (ElasticsearchUtil.class) {
-    			if (transportClient == null) {
-    		    	String elasticsearchHost =object.getElasticsearchHost();
-    		    	String elasticsearchPort =object.getElasticsearchPort();
-    		    	String elasticsearchCluster =object.getElasticsearchCluster();
-    		    	String elasticsearchNode =object.getElasticsearchNode();
-    		    	try {
-    		    		Settings settings = Settings.builder()
-    		    				.put("cluster.name", elasticsearchCluster)
-    		    				.put("node.name", elasticsearchNode)
-    		    				.build();
-    		    		transportClient = new PreBuiltTransportClient(settings)
-    		    				.addTransportAddress(
-    		    				new InetSocketTransportAddress(
-    		    				new InetSocketAddress(elasticsearchHost, Integer.parseInt(elasticsearchPort))));
-    		    	} catch (Exception e) {
-    		    		e.printStackTrace();
-    		    	}
-    			}
-    		}
-    	}
-    	return transportClient;
+    public static ElasticsearchClient elasticsearchClient() {
+        if (elasticsearchClient == null) {
+            synchronized (ElasticsearchUtil.class) {
+                if (elasticsearchClient == null) {
+                    String elasticsearchHost = object.getElasticsearchHost();
+                    String elasticsearchPort = object.getElasticsearchPort();
+                    restClient = RestClient.builder(new HttpHost(
+                            elasticsearchHost, Integer.parseInt(elasticsearchPort), "http")).build();
+                    elasticsearchClient = new ElasticsearchClient(
+                            new RestClientTransport(restClient, new JacksonJsonpMapper()));
+                }
+            }
+        }
+        return elasticsearchClient;
       }
 
 	@PreDestroy
-	public void closeTransportClient() {
+	public void closeElasticsearchClient() throws IOException {
 		synchronized (ElasticsearchUtil.class) {
-			if (transportClient != null) {
-				transportClient.close();
-				transportClient = null;
+			if (restClient != null) {
+				restClient.close();
+				restClient = null;
+				elasticsearchClient = null;
 			}
 		}
 	}

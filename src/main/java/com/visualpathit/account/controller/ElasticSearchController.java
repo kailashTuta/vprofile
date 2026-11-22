@@ -1,14 +1,15 @@
 package com.visualpathit.account.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
+import co.elastic.clients.elasticsearch.core.DeleteResponse;
+import co.elastic.clients.elasticsearch.core.GetResponse;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.UpdateResponse;
+import co.elastic.clients.json.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,8 +21,6 @@ import com.visualpathit.account.model.User;
 import com.visualpathit.account.service.UserService;
 import com.visualpathit.account.utils.ElasticsearchUtil;
 
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-
 @Controller
 public class ElasticSearchController {
 	@Autowired
@@ -30,32 +29,23 @@ public class ElasticSearchController {
     @RequestMapping(value="/user/elasticsearch", method=RequestMethod.GET)
     public String insert(final Model model) throws IOException {
     	List<User> users = userService.getList();
-    	//contextMapping();
-    	
-    	/*	for (User user : users) {
-    		//IndexRequest indexRequest = new IndexRequest("users","user",  String.valueOf(user.getId()));
-    		//indexRequest.source(new Gson().toJson(user));
-    		//IndexResponse response = ElasticsearchUtil.trannsportClient().index(indexRequest).actionGet();
-     	   	System.out.println("User" +new Gson().toJson(user));
-		}*/
     	String result ="";
     	for (User user : users) {
-    	IndexResponse response = ElasticsearchUtil.trannsportClient().prepareIndex("users","user",  String.valueOf(user.getId()))
-                .setSource(jsonBuilder()
-                        .startObject()
-                        .field("name", user.getUsername())
-                        .field("DOB",user.getDateOfBirth())
-                        .field("fatherName",user.getFatherName())
-                        .field("motherName",user.getMotherName())
-                        .field("gender",user.getGender())
-                        .field("nationality",user.getNationality())
-                        .field("phoneNumber", user.getPhoneNumber())
-                        .endObject()
-                )
-                .get();
-        String res =response.getResult().toString();
-        System.out.println(res);
-        result="Users";
+            Map<String, Object> document = new HashMap<>();
+            document.put("name", user.getUsername());
+            document.put("DOB", user.getDateOfBirth());
+            document.put("fatherName", user.getFatherName());
+            document.put("motherName", user.getMotherName());
+            document.put("gender", user.getGender());
+            document.put("nationality", user.getNationality());
+            document.put("phoneNumber", user.getPhoneNumber());
+            IndexResponse response = ElasticsearchUtil.elasticsearchClient().index(index -> index
+                    .index("users")
+                    .id(String.valueOf(user.getId()))
+                    .document(document));
+	        String res = response.result().toString();
+	        System.out.println(res);
+	        result="Users";
     	}
     	model.addAttribute(result);
         return "elasticeSearchRes";
@@ -63,11 +53,20 @@ public class ElasticSearchController {
     }
 
     @RequestMapping(value="/rest/users/view/{id}", method=RequestMethod.GET)
-    public String  view(@PathVariable("id") final String id,final Model model) {
-        GetResponse getResponse = ElasticsearchUtil.trannsportClient().prepareGet("users", "user", id).get();
-        System.out.println(getResponse.getSource());
-        
-        model.addAttribute("res", getResponse.getSource().get("name"));
+    public String  view(@PathVariable("id") final String id,final Model model) throws IOException {
+        GetResponse<JsonData> getResponse = ElasticsearchUtil.elasticsearchClient().get(
+                request -> request.index("users").id(id), JsonData.class);
+        JsonData source = getResponse.source();
+        if (source == null) {
+            throw new IOException("Elasticsearch returned no user document for id " + id);
+        }
+        System.out.println(source);
+
+        Object document = source.to(Object.class);
+        if (!(document instanceof Map<?, ?> fields)) {
+            throw new IOException("Elasticsearch returned a user document that is not an object");
+        }
+        model.addAttribute("res", fields.get("name"));
        
         return "elasticeSearchRes";
     }
@@ -86,31 +85,19 @@ public class ElasticSearchController {
 
     @RequestMapping(value="/rest/users/update/{id}", method=RequestMethod.GET)
     public String update(@PathVariable("id") final String id,final Model model) throws IOException {
-
-        UpdateRequest updateRequest = new UpdateRequest();
-        updateRequest.index("employee")
-                .type("id")
-                .id(id)
-                .doc(jsonBuilder()
-                        .startObject()
-                        .field("gender", "male")
-                        .endObject());
-        try {
-            UpdateResponse updateResponse = ElasticsearchUtil.trannsportClient().update(updateRequest).get();
-            System.out.println(updateResponse.status());
-            model.addAttribute("res", updateResponse.status());
-            return "elasticeSearchRes";
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println(e);
-        }
+        UpdateResponse<JsonData> updateResponse = ElasticsearchUtil.elasticsearchClient().update(
+                request -> request.index("employee").id(id).doc(Map.of("gender", "male")), JsonData.class);
+        System.out.println(updateResponse.result());
+        model.addAttribute("res", updateResponse.result());
         return "elasticeSearchRes";
     }
     @RequestMapping(value="/rest/users/delete/{id}", method=RequestMethod.GET)
-    public String delete(@PathVariable("id") final String id,final Model model) {
+    public String delete(@PathVariable("id") final String id,final Model model) throws IOException {
 
-        DeleteResponse deleteResponse =ElasticsearchUtil.trannsportClient().prepareDelete("employee", "id", id).get();
-        System.out.println(deleteResponse.getResult().toString());
-        model.addAttribute("res", deleteResponse.getResult().toString());
+        DeleteResponse deleteResponse = ElasticsearchUtil.elasticsearchClient().delete(
+                request -> request.index("employee").id(id));
+        System.out.println(deleteResponse.result().toString());
+        model.addAttribute("res", deleteResponse.result().toString());
         return "elasticeSearchRes";
     }
     /*public void contextMapping() throws IOException{    	   	
