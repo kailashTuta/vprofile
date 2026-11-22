@@ -59,7 +59,7 @@ jobs:
               retention-days: 7
     
     docker-scan:
-      runs-on: ubutu-latest
+      runs-on: ubuntu-latest
       needs: [dependency-check]
       strategy:
         fail-fast: false
