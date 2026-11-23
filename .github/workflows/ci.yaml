@@ -89,11 +89,20 @@ jobs:
           continue-on-error: true
           with:
             image-ref: ${{ secrets.DOCKER_USERNAME }}/vprofile-${{ matrix.folders }}:latest
-            format: 'table'
+            format: 'template'
+            template: '@html.tpl'
+            output: 'trivy-report.html'
             exit-code: '1'
             ignore-unfixed: true
             vuln-type: 'os,library'
             severity: 'CRITICAL,HIGH'
 
-
+        - name: Upload Trivy-Check report
+          if: always()
+          uses: actions/upload-artifact@v4
+          with:
+            name: Trivy-check-report
+            path: reports
+            if-no-files-found: warn
+            retention-days: 7
               
