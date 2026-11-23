@@ -7,8 +7,8 @@ services:
     container_name: devopsdb
     image: kailashtuta/devops-vprofile-db:latest
     environment:
-      MYSQL_ROOT_PASSWORD: devopspassword
-      MYSQL_DATABASE: accounts
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-accounts}
     ports:
       - "3306:3306"
     volumes:
@@ -25,9 +25,9 @@ services:
     ports:
       - "1234:8080"
     environment:
-      JDBC_URL: jdbc:mysql://database:3306/accounts?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
-      JDBC_USERNAME: root
-      JDBC_PASSWORD: devopspassword
+      JDBC_URL: jdbc:mysql://database:3306/${MYSQL_DATABASE:-accounts}?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
+      JDBC_USERNAME: ${MYSQL_USERNAME:-root}
+      JDBC_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
 
 volumes:
   db_data:
