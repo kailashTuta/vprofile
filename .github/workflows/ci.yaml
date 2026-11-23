@@ -93,7 +93,7 @@ jobs:
           with:
             image-ref: ${{ secrets.DOCKER_USERNAME }}/vprofile-${{ matrix.folder }}:latest
             format: 'template'
-            template: '@html.tpl'
+            template: '@contrib/html.tpl'
             output: 'trivy-report.html'
             exit-code: '1'
             ignore-unfixed: true
@@ -104,8 +104,8 @@ jobs:
           if: always()
           uses: actions/upload-artifact@v4
           with:
-            name: Trivy-check-report
-            path: reports
+            name: Trivy-check-report-${{ matrix.folder }}
+            path: trivy-report.html
             if-no-files-found: warn
             retention-days: 7
               
