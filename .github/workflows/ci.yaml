@@ -93,7 +93,7 @@ jobs:
           with:
             image-ref: ${{ secrets.DOCKER_USERNAME }}/vprofile-${{ matrix.folder }}:latest
             format: 'template'
-            template: '@contrib/html.tpl'
+            template: '@$HOME/.local/bin/trivy-bin/contrib/html.tpl'
             output: 'trivy-report.html'
             exit-code: '1'
             ignore-unfixed: true
