@@ -3,7 +3,7 @@ version: "3.8"
 services:
   database:
     build:
-      context: ./Docker-db
+      context: ./db
     container_name: devopsdb
     image: kailashtuta/devops-vprofile-db:latest
     environment:
@@ -17,7 +17,7 @@ services:
   application:
     build:
       context: .
-      dockerfile: Docker-app/Dockerfile
+      dockerfile: app/Dockerfile
     container_name: appcontainer
     image: kailashtuta/devops-vprofile-app:latest
     depends_on:
